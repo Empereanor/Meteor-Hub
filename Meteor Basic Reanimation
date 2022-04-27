@@ -1,0 +1,200 @@
+-- Simulation Radius
+
+game:GetService("RunService").Stepped:Connect(function()
+	sethiddenproperty(game.Players.LocalPlayer, "MaximumSimulationRadius", 9e9)
+	sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", 9e9)
+end)
+
+-- Variables
+
+local Player = game.Players.LocalPlayer
+local Character = Player.Character
+local Humanoid = Character:FindFirstChildOfClass("Humanoid")
+
+-- Rig 
+
+local Dummy = game:GetObjects("rbxassetid://9435290411")[1]
+
+-- Rig Settings 
+
+Dummy.Parent = Character
+Dummy.Name = "Dummy"
+
+Dummy:MoveTo(Character["HumanoidRootPart"].Position)
+
+-- Character 
+
+Character.Archivable = true
+
+Character["HumanoidRootPart"].Anchored = true
+
+if Character:FindFirstChild("Animate") then
+    Character.Animate.Disabled = true 
+end
+
+-- Anti Ragdoll
+
+for _,RagdollConstraint in pairs(Character:GetDescendants()) do
+    if RagdollConstraint:IsA("BallSocketConstraint") or RagdollConstraint:IsA("HingeConstraint") then
+        RagdollConstraint:Destroy()
+    end
+end
+
+-- Humanoid
+
+if Humanoid:FindFirstChild("Animator") then
+    Humanoid.Animator:remove() 
+end
+
+Humanoid:ChangeState(16)
+
+Humanoid.WalkSpeed = 0 
+Humanoid.JumpPower = 0 
+
+Humanoid.AutoRotate = false
+Humanoid.AutoJumpEnabled = false
+
+-- Shortcuts
+
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+-- No-Clip
+
+Humanoid:ChangeState(11)
+
+local NoclipConnection; NoclipConnection = RunService.Stepped:Connect(function()
+    if not Character:IsDescendantOf(game) or not Dummy:IsDescendantOf(game) then
+        NoclipConnection:Disconnect()
+        
+        return
+    end
+    
+    for _, Object in pairs(Character:GetChildren()) do
+        if Object:IsA("BasePart") then
+            Object.CanCollide = false
+        end
+    end
+end)
+
+for _,b in pairs(Dummy:GetChildren()) do
+    if b:IsA("Part") or b:IsA("BasePart") then
+        b.CanCollide = false
+    end
+end
+
+game:GetService("UserInputService").JumpRequest:Connect(function()
+    Dummy.Humanoid.Sit = false
+    Dummy.Humanoid.Jump = true
+end)
+
+-- Functions
+
+function Align(P0, P1, Pos, Rot) -- Arguments
+    spawn(function()
+        while task.wait(1-1) do --Loop
+            game:GetService("RunService").Heartbeat:Connect(function()
+                P0.CFrame = P1.CFrame * CFrame.new(Vector3.new(0, 0, 0)) * CFrame.Angles(0, 0, 0)
+            end)
+        end
+    end)
+end -- Emper's CFramed Align Function
+
+function LoadLibrary()
+    return loadstring(game:HttpGet("https://pastebin.com/raw/UfzKgS6T", true))()
+end
+
+-- Dummy
+
+for _,v in pairs(Dummy:GetDescendants()) do 
+    if v:IsA("Part") or v:IsA("BasePart") or v:IsA("Decal") then 
+        v.Transparency = 1
+    end
+end
+
+-- Accessories
+
+for _,acc in pairs(Character:GetChildren()) do
+    if acc:IsA("Accessory") and acc:FindFirstChildOfClass("Part") then
+        local cln = acc:Clone()
+        cln.Parent = Dummy
+        
+        acc.Handle:BreakJoints()
+        
+        Align(acc.Handle, cln.Handle)
+
+    end
+end
+
+-- R6
+
+if Humanoid.RigType == Enum.HumanoidRigType.R6 then
+    
+    -- Joints
+    
+    Character["Right Arm"]:BreakJoints()
+    Character["Right Leg"]:BreakJoints()
+    Character["Left Arm"]:BreakJoints()
+    Character["Left Leg"]:BreakJoints()
+    
+    Character["HumanoidRootPart"]:Destroy()
+    
+    -- Align
+    
+    Align(Character["Right Arm"], Character.Dummy["Right Arm"])
+    Align(Character["Left Arm"], Character.Dummy["Left Arm"])
+    Align(Character["Right Leg"], Character.Dummy["Right Leg"])
+    Align(Character["Left Leg"], Character.Dummy["Left Leg"])
+    Align(Character["Torso"], Character.Dummy["Torso"])
+    Align(Character["Head"], Character.Dummy["Head"])
+
+    
+elseif Humanoid.RigType == Enum.HumanoidRigType.R15 then
+    
+    -- Joints 
+    
+    Character["RightUpperArm"]:BreakJoints()
+    Character["RightLowerArm"]:BreakJoints()
+    Character["RightHand"]:BreakJoints()
+    Character["LeftUpperArm"]:BreakJoints()
+    Character["LeftLowerArm"]:BreakJoints()
+    Character["LeftHand"]:BreakJoints()
+    Character["RightUpperLeg"]:BreakJoints()
+    Character["RightLowerLeg"]:BreakJoints()
+    Character["RightFoot"]:BreakJoints()
+    Character["LeftUpperLeg"]:BreakJoints()
+    Character["LeftLowerLeg"]:BreakJoints()
+    Character["LeftFoot"]:BreakJoints()
+
+    -- Align 
+   
+    Align(Character["RightUpperArm"], Dummy["Right Arm"], CFrame.new(0,-0.36867332458496094,0))
+    Align(Character["RightLowerArm"], Dummy["Right Arm"], CFrame.new(0,0.22407126426696777,0))
+    Align(Character["RightHand"], Dummy["Right Arm"], CFrame.new(0,0.8500454425811768,0))
+
+    Align(Character["LeftUpperArm"], Dummy["Left Arm"], CFrame.new(0,-0.36867332458496094,0))
+    Align(Character["LeftLowerArm"], Dummy["Left Arm"], CFrame.new(0,0.22407126426696777,0))
+    Align(Character["LeftHand"], Dummy["Left Arm"], CFrame.new(0,0.8500454425811768,0))
+
+    Align(Character["RightUpperLeg"], Dummy["Right Leg"], CFrame.new(0,-0.5792183876037598,0))
+    Align(Character["RightLowerLeg"], Dummy["Right Leg"], CFrame.new(0,0.20090234279632568,0))
+    Align(Character["RightFoot"], Dummy["Right Leg"], CFrame.new(0,0.8499990701675415,0))
+
+    Align(Character["LeftUpperLeg"], Dummy["Left Leg"], CFrame.new(0,-0.5792183876037598,0))
+    Align(Character["LeftLowerLeg"], Dummy["Left Leg"], CFrame.new(0,0.20090234279632568,0))
+    Align(Character["LeftFoot"], Dummy["Left Leg"], CFrame.new(0,0.8499990701675415,0))
+
+    Align(Character.UpperTorso, Dummy.Torso, CFrame.new(0, -0.1999831199645996, 0))
+    Align(Character.LowerTorso, Dummy.Torso, CFrame.new(0, 0.8000273704528809, 0))
+
+    
+end
+
+-- Character Set 
+
+game.Players.LocalPlayer.Character = Dummy
+
+-- Camera Fix
+
+workspace.CurrentCamera.CameraSubject = Dummy.Humanoid
+
