@@ -150,12 +150,12 @@ if Humanoid.RigType == Enum.HumanoidRigType.R6 then
     
     spawn(function()
         while task.wait() do
-            Align(Character["Right Arm"], Character.Dummy["Right Arm"], Vector3.new(0, 0, 0), CFrame.Angles(0 ,0 ,0))
-            Align(Character["Left Arm"], Character.Dummy["Left Arm"], Vector3.new(0, 0, 0), CFrame.Angles(0 ,0 ,0))
-            Align(Character["Right Leg"], Character.Dummy["Right Leg"], Vector3.new(0, 0, 0), CFrame.Angles(0 ,0 ,0))
-            Align(Character["Left Leg"], Character.Dummy["Left Leg"], Vector3.new(0, 0, 0), CFrame.Angles(0 ,0 ,0))
-            Align(Character["Torso"], Character.Dummy["Torso"], Vector3.new(0, 0, 0), CFrame.Angles(0 ,0 ,0))
-            Align(Character["Head"], Character.Dummy["Head"], Vector3.new(0, 0, 0), CFrame.Angles(0 ,0 ,0))
+            Align(Character["Right Arm"], Character.Dummy["Right Arm"], Vector3.new(0, 0.01, 0), CFrame.Angles(0 ,0 ,0))
+            Align(Character["Left Arm"], Character.Dummy["Left Arm"], Vector3.new(0, 0.01, 0), CFrame.Angles(0 ,0 ,0))
+            Align(Character["Right Leg"], Character.Dummy["Right Leg"], Vector3.new(0, 0.01, 0), CFrame.Angles(0 ,0 ,0))
+            Align(Character["Left Leg"], Character.Dummy["Left Leg"], Vector3.new(0, 0.01, 0), CFrame.Angles(0 ,0 ,0))
+            Align(Character["Torso"], Character.Dummy["Torso"], Vector3.new(0, 0.01, 0), CFrame.Angles(0 ,0 ,0))
+            Align(Character["Head"], Character.Dummy["Head"], Vector3.new(0, 0.01, 0), CFrame.Angles(0 ,0 ,0))
         end
     end)
     
