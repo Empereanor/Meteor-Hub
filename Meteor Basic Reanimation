@@ -10,9 +10,9 @@ local Player = game.Players.LocalPlayer
 local Character = Player.Character
 local Humanoid = Character:FindFirstChildOfClass("Humanoid")
 
--- Rig 
+-- Rig Body
 
-local Dummy = game:GetObjects("rbxassetid://9435290411")[1]
+local Dummy = game:GetObjects("rbxassetid://9528121236")[1]
 
 -- Rig Settings 
 
