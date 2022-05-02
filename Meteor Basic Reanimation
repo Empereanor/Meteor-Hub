@@ -25,7 +25,7 @@ Dummy:MoveTo(Character["HumanoidRootPart"].Position)
 
 Character.Archivable = true
 
-Character["HumanoidRootPart"].Anchored = true
+Character["HumanoidRootPart"]:Destroy()
 
 if Character:FindFirstChild("Animate") then
     Character.Animate.Disabled = true 
@@ -112,24 +112,27 @@ for _,v in pairs(Dummy:GetDescendants()) do
     end
 end
 
+-- Accessories
+
+for _,acc in pairs(Character:GetChildren()) do
+    if acc:IsA("Accessory") then
+        spawn(function()
+            while task.wait(1-1) do
+                acc.Handle.Velocity = Vector3.new(-25.05, 0, 0)
+            end
+        end)
+    end
+end
+
 -- Velocity
 
 for _,Net in pairs(Character:GetChildren()) do
     if Net:IsA("BasePart") or Net:IsA("MeshPart") then
         spawn(function()
             while task.wait(1-1) do
-                Net.Velocity = Vector3.new(-30, -30, -30)
+                Net.Velocity = Vector3.new(-25.05, -0, -0)
             end
         end)
-    end
-end
-
--- Body Velocity
-
-for _,bv in pairs(Character:GetChildren()) do
-    if bv:IsA("BasePart") or bv:IsA("MeshPart") then
-        local BV = Instance.new("BodyVelocity");BV.Parent = bv;BV.MaxForce = Vector3.new(0, 0, 0);BV.Name = "Meteor";
-        BV.Velocity = Vector3.new(0, 0, 0)
     end
 end
 
@@ -143,8 +146,6 @@ if Humanoid.RigType == Enum.HumanoidRigType.R6 then
     Character["Right Leg"]:BreakJoints()
     Character["Left Arm"]:BreakJoints()
     Character["Left Leg"]:BreakJoints()
-    
-    Character["HumanoidRootPart"]:Destroy()
     
     -- Align
     
@@ -175,7 +176,6 @@ elseif Humanoid.RigType == Enum.HumanoidRigType.R15 then
     Character["LeftUpperLeg"]:BreakJoints()
     Character["LeftLowerLeg"]:BreakJoints()
     Character["LeftFoot"]:BreakJoints()
-    Character["HumanoidRootPart"]:remove()
     Character.UpperTorso.Waist:remove()
     Character.LowerTorso.Root:remove()
 
@@ -202,6 +202,8 @@ elseif Humanoid.RigType == Enum.HumanoidRigType.R15 then
 
             Align(Character.UpperTorso, Dummy.Torso, Vector3.new(0, 0.1999831199645996, 0), CFrame.Angles(0, 0, 0))
             Align(Character.LowerTorso, Dummy.Torso, Vector3.new(0, -0.8000273704528809, 0), CFrame.Angles(0, 0, 0))
+            
+            Align(Character.Head, Dummy.Head, Vector3.new(0, 0, 0), CFrame.Angles(0, 0, 0))
         end
     end)
     
