@@ -149,7 +149,7 @@ if Humanoid.RigType == Enum.HumanoidRigType.R6 then
     -- Align
     
     spawn(function()
-        while task.wait() do
+        while task.wait(1-1) do
             Align(Character["Right Arm"], Character.Dummy["Right Arm"], Vector3.new(0, 0.01, 0), CFrame.Angles(0 ,0 ,0))
             Align(Character["Left Arm"], Character.Dummy["Left Arm"], Vector3.new(0, 0.01, 0), CFrame.Angles(0 ,0 ,0))
             Align(Character["Right Leg"], Character.Dummy["Right Leg"], Vector3.new(0, 0.01, 0), CFrame.Angles(0 ,0 ,0))
@@ -183,7 +183,7 @@ elseif Humanoid.RigType == Enum.HumanoidRigType.R15 then
     -- Align 
    
    spawn(function()
-       while task.wait() do
+       while task.wait(1-1) do
             Align(Character["RightUpperArm"], Dummy["Right Arm"], Vector3.new(0,0.36867332458496094,0), CFrame.Angles(0, 0, 0))
             Align(Character["RightLowerArm"], Dummy["Right Arm"], Vector3.new(0,-0.22407126426696777,0), CFrame.Angles(0, 0, 0))
             Align(Character["RightHand"], Dummy["Right Arm"], Vector3.new(0,-0.8500454425811768,0), CFrame.Angles(0, 0, 0))
