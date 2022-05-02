@@ -12,7 +12,7 @@ local Humanoid = Character:FindFirstChildOfClass("Humanoid")
 
 -- Rig Body
 
-local Dummy = game:GetObjects("rbxassetid://9528121236")[1]
+local Dummy = game:GetObjects("rbxassetid://9528321252")[1]
 
 -- Rig Settings 
 
