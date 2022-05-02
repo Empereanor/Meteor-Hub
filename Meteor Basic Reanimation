@@ -4,14 +4,6 @@ settings().Physics.AllowSleep = false
 settings().Physics.DisableCSGv2 = true
 settings().Physics.PhysicsEnvironmentalThrottle = Enum.EnviromentalPhysicsThrottle.Disabled
 
--- Simulation Radius
-
-game:GetService("RunService").RenderStepped:Connect(function()
-    setscriptable(game.Players.LocalPlayer, "SimulationRadius", true)
-    sethiddenproperty(game.Players.LocalPlayer, "MaximumSimulationRadius", 1e+35)
-    sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", 1e+35)
-end)
-
 -- Variables
 
 local Player = game.Players.LocalPlayer
