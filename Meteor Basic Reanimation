@@ -118,7 +118,7 @@ for _,Net in pairs(Character:GetChildren()) do
     if Net:IsA("BasePart") or Net:IsA("MeshPart") then
         spawn(function()
             while task.wait(1-1) do
-                Net.Velocity = Vector3.new(-40, -40, -40)
+                Net.Velocity = Vector3.new(-30, -30, -30)
             end
         end)
     end
