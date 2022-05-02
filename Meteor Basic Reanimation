@@ -128,7 +128,7 @@ end
 
 for _,bv in pairs(Character:GetChildren()) do
     if bv:IsA("BasePart") or bv:IsA("MeshPart") then
-        local BV = Instance.new("BodyVelocity");BV.Parent = bv;BV.MaxForce = Vector3.new(0, 0, 0);
+        local BV = Instance.new("BodyVelocity");BV.Parent = bv;BV.MaxForce = Vector3.new(0, 0, 0);BV.Name = "Meteor";
         BV.Velocity = Vector3.new(0, 0, 0)
     end
 end
