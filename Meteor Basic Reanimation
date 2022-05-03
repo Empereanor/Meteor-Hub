@@ -100,7 +100,7 @@ function Align(Part1, Part2, Pos, Angle)
     Part1.CFrame = Part1.CFrame:Lerp(Part2.CFrame * CFrame.new(Pos) * Angle or Part2.CFrame * CFrame.new(Vector3.new(0, 0, 0)) * CFrame.Angles(0, 0, 0), .3)
 end
 
-function LoadLibrary()
+function LoadLibrary() -- Phere's LoadLibrary ::praise::
     return loadstring(game:HttpGet("https://pastebin.com/raw/UfzKgS6T", true))()
 end
 
