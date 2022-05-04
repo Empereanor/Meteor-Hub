@@ -25,8 +25,6 @@ Dummy:MoveTo(Character["HumanoidRootPart"].Position)
 
 Character.Archivable = true
 
-Character["HumanoidRootPart"]:Destroy()
-
 if Character:FindFirstChild("Animate") then
     Character.Animate.Disabled = true 
 end
@@ -100,7 +98,7 @@ function Align(Part1, Part2, Pos, Angle)
     Part1.CFrame = Part1.CFrame:Lerp(Part2.CFrame * CFrame.new(Pos) * Angle or Part2.CFrame * CFrame.new(Vector3.new(0, 0, 0)) * CFrame.Angles(0, 0, 0), .3)
 end
 
-function LoadLibrary() -- Phere's LoadLibrary ::praise::
+function LoadLibrary()
     return loadstring(game:HttpGet("https://pastebin.com/raw/UfzKgS6T", true))()
 end
 
@@ -142,6 +140,7 @@ if Humanoid.RigType == Enum.HumanoidRigType.R6 then
     
     -- Joints
     
+    Character["HumanoidRootPart"]:Destroy()
     Character["Right Arm"]:BreakJoints()
     Character["Right Leg"]:BreakJoints()
     Character["Left Arm"]:BreakJoints()
@@ -179,7 +178,6 @@ elseif Humanoid.RigType == Enum.HumanoidRigType.R15 then
     Character.UpperTorso.Waist:remove()
     Character.LowerTorso.Root:remove()
 
-
     -- Align 
    
    spawn(function()
@@ -202,6 +200,7 @@ elseif Humanoid.RigType == Enum.HumanoidRigType.R15 then
 
             Align(Character.UpperTorso, Dummy.Torso, Vector3.new(0, 0.1999831199645996, 0), CFrame.Angles(0, 0, 0))
             Align(Character.LowerTorso, Dummy.Torso, Vector3.new(0, -0.8000273704528809, 0), CFrame.Angles(0, 0, 0))
+            Align(Character.HumanoidRootPart, Dummy.HumanoidRootPart, Vector3.new(0, 0, 0), CFrame.Angles(0, 0, 0))
             
             Align(Character.Head, Dummy.Head, Vector3.new(0, 0, 0), CFrame.Angles(0, 0, 0))
         end
