@@ -25,6 +25,8 @@ Dummy:MoveTo(Character["HumanoidRootPart"].Position)
 
 Character.Archivable = true
 
+Character.HumanoidRootPart:remove()
+
 if Character:FindFirstChild("Animate") then
     Character.Animate.Disabled = true 
 end
@@ -64,8 +66,6 @@ local UserInputService = game:GetService("UserInputService")
 
 -- No-Clip
 
-Humanoid:ChangeState(11)
-
 local NoclipConnection; NoclipConnection = RunService.Stepped:Connect(function()
     if not Character:IsDescendantOf(game) or not Dummy:IsDescendantOf(game) then
         NoclipConnection:Disconnect()
@@ -93,44 +93,46 @@ end)
 
 -- Functions
 
-function Align(Part1, Part2, Pos, Angle)
-    Part1.CFrame = Part2.CFrame * CFrame.new(Pos) * CFrame.new(0, 0, 0) * Angle or Part2.CFrame * CFrame.new(Vector3.new(0, 0, 0)) * CFrame.new(0, 0, 0) * CFrame.Angles(0, 0, 0)
-    Part1.CFrame = Part1.CFrame:Lerp(Part2.CFrame * CFrame.new(Pos) * Angle or Part2.CFrame * CFrame.new(Vector3.new(0, 0, 0)) * CFrame.Angles(0, 0, 0), .3)
+local function Align(Part1,Part2,Pos,Angle)
+    Part1.CFrame = Part2.CFrame * Pos or CFrame.new(0, 0, 0) * Angle or CFrame.Angles(0, 0 ,0)
+end
+
+function Hatlign(Hat1, Hat2)
+    Hat1.CFrame = Hat2.CFrame *CFrame.new(0.01, 0.01, 0.01) *CFrame.Angles(0.01, 0.01, 0.01)
 end
 
 function LoadLibrary()
     return loadstring(game:HttpGet("https://pastebin.com/raw/UfzKgS6T", true))()
 end
 
+function loop()
+    spawn(function()
+        while true do
+            task.wait()
+        end
+    end)
+end
+
 -- Dummy
 
 for _,v in pairs(Dummy:GetDescendants()) do
-    if v:IsA("Part") or v:IsA("BasePart") or v:IsA("Decal") then 
+    if v:IsA("BasePart") or v:IsA("Decal") then 
         v.Transparency = 1
     end
 end
 
 -- Accessories
-
-for _,acc in pairs(Character:GetChildren()) do
-    if acc:IsA("Accessory") then
-        spawn(function()
-            while task.wait(1-1) do
-                acc.Handle.Velocity = Vector3.new(-25.05, 0, 0)
-            end
-        end)
+for _,Ali in pairs(Character:GetChildren()) do
+    if Ali:IsA("Accessory") then
+        local Hats = Ali;local Clone = Ali:Clone(); Clone.Parent = Dummy
     end
 end
 
--- Velocity
+-- Accessories Invisible
 
-for _,Net in pairs(Character:GetChildren()) do
-    if Net:IsA("BasePart") or Net:IsA("MeshPart") then
-        spawn(function()
-            while task.wait(1-1) do
-                Net.Velocity = Vector3.new(-25.05, -0, -0)
-            end
-        end)
+for _,inv in pairs(Dummy:GetChildren()) do
+    if inv:IsA("Accessory") then
+        inv.Handle.Transparency = 1
     end
 end
 
@@ -138,9 +140,20 @@ end
 
 if Humanoid.RigType == Enum.HumanoidRigType.R6 then
     
+    -- Velocity
+
+    for _,Net in pairs(Character:GetChildren()) do
+        if Net:IsA("BasePart") or Net:IsA("MeshPart") then
+            spawn(function()
+                while task.wait(1-1) do
+                    Net.Velocity = Vector3.new(100, -0, -0)
+                end
+            end)
+        end
+    end
+    
     -- Joints
     
-    Character["HumanoidRootPart"]:Destroy()
     Character["Right Arm"]:BreakJoints()
     Character["Right Leg"]:BreakJoints()
     Character["Left Arm"]:BreakJoints()
@@ -149,17 +162,30 @@ if Humanoid.RigType == Enum.HumanoidRigType.R6 then
     -- Align
     
     spawn(function()
-        while task.wait(1-1) do
-            Align(Character["Right Arm"], Character.Dummy["Right Arm"], Vector3.new(0, 0.01, 0), CFrame.Angles(0 ,0 ,0))
-            Align(Character["Left Arm"], Character.Dummy["Left Arm"], Vector3.new(0, 0.01, 0), CFrame.Angles(0 ,0 ,0))
-            Align(Character["Right Leg"], Character.Dummy["Right Leg"], Vector3.new(0, 0.01, 0), CFrame.Angles(0 ,0 ,0))
-            Align(Character["Left Leg"], Character.Dummy["Left Leg"], Vector3.new(0, 0.01, 0), CFrame.Angles(0 ,0 ,0))
-            Align(Character["Torso"], Character.Dummy["Torso"], Vector3.new(0, 0.01, 0), CFrame.Angles(0 ,0 ,0))
-            Align(Character["Head"], Character.Dummy["Head"], Vector3.new(0, 0.01, 0), CFrame.Angles(0 ,0 ,0))
+        while true do
+            task.wait()
+            Align(Character["Right Arm"], Character.Dummy["Right Arm"], CFrame.new(0, 0.01, 0), CFrame.Angles(0 ,0 ,0))
+            Align(Character["Left Arm"], Character.Dummy["Left Arm"], CFrame.new(0, 0.01, 0), CFrame.Angles(0 ,0 ,0))
+            Align(Character["Right Leg"], Character.Dummy["Right Leg"], CFrame.new(0, 0.01, 0), CFrame.Angles(0 ,0 ,0))
+            Align(Character["Left Leg"], Character.Dummy["Left Leg"], CFrame.new(0, 0.01, 0), CFrame.Angles(0 ,0 ,0))
+            Align(Character["Torso"], Character.Dummy["Torso"], CFrame.new(0, 0.01, 0), CFrame.Angles(0 ,0 ,0))
+            Align(Character["Head"], Character.Dummy["Head"], CFrame.new(0, 0.01, 0), CFrame.Angles(0 ,0 ,0))
         end
     end)
     
 elseif Humanoid.RigType == Enum.HumanoidRigType.R15 then
+    
+    -- Velocity
+    
+    for _,Net in pairs(Character:GetChildren()) do
+        if Net:IsA("BasePart") or Net:IsA("MeshPart") then
+            spawn(function()
+                while task.wait(1-1) do
+                    Net.Velocity = Vector3.new(-0, -0, -55)
+                end
+            end)
+        end
+    end
     
     -- Joints 
     
@@ -182,31 +208,40 @@ elseif Humanoid.RigType == Enum.HumanoidRigType.R15 then
    
    spawn(function()
        while task.wait(1-1) do
-            Align(Character["RightUpperArm"], Dummy["Right Arm"], Vector3.new(0,0.36867332458496094,0), CFrame.Angles(0, 0, 0))
-            Align(Character["RightLowerArm"], Dummy["Right Arm"], Vector3.new(0,-0.22407126426696777,0), CFrame.Angles(0, 0, 0))
-            Align(Character["RightHand"], Dummy["Right Arm"], Vector3.new(0,-0.8500454425811768,0), CFrame.Angles(0, 0, 0))
+            Align(Character["RightUpperArm"], Dummy["Right Arm"], CFrame.new(0,0.36867332458496094,0), Vector3.new(0,0,0))
+            Align(Character["RightLowerArm"], Dummy["Right Arm"], CFrame.new(0,-0.22407126426696777,0), CFrame.Angles(0, 0, 0))
+            Align(Character["RightHand"], Dummy["Right Arm"], CFrame.new(0,-0.8500454425811768,0), CFrame.Angles(0, 0, 0))
 
-            Align(Character["LeftUpperArm"], Dummy["Left Arm"], Vector3.new(0,0.36867332458496094,0), CFrame.Angles(0, 0, 0))
-            Align(Character["LeftLowerArm"], Dummy["Left Arm"], Vector3.new(0,-0.22407126426696777,0), CFrame.Angles(0, 0, 0))
-            Align(Character["LeftHand"], Dummy["Left Arm"], Vector3.new(0,-0.8500454425811768,0), CFrame.Angles(0, 0, 0))
+            Align(Character["LeftUpperArm"], Dummy["Left Arm"], CFrame.new(0,0.36867332458496094,0), CFrame.Angles(0, 0, 0))
+            Align(Character["LeftLowerArm"], Dummy["Left Arm"], CFrame.new(0,-0.22407126426696777,0), CFrame.Angles(0, 0, 0))
+            Align(Character["LeftHand"], Dummy["Left Arm"], CFrame.new(0,-0.8500454425811768,0), CFrame.Angles(0, 0, 0))
 
-            Align(Character["RightUpperLeg"], Dummy["Right Leg"], Vector3.new(0,0.5792183876037598,0), CFrame.Angles(0, 0, 0))
-            Align(Character["RightLowerLeg"], Dummy["Right Leg"], Vector3.new(0,-0.20090234279632568,0), CFrame.Angles(0, 0, 0))
-            Align(Character["RightFoot"], Dummy["Right Leg"], Vector3.new(0,-0.8499990701675415,0), CFrame.Angles(0, 0, 0))
+            Align(Character["RightUpperLeg"], Dummy["Right Leg"], CFrame.new(0,0.5792183876037598,0), CFrame.Angles(0, 0, 0))
+            Align(Character["RightLowerLeg"], Dummy["Right Leg"], CFrame.new(0,-0.20090234279632568,0), CFrame.Angles(0, 0, 0))
+            Align(Character["RightFoot"], Dummy["Right Leg"], CFrame.new(0,-0.8499990701675415,0), CFrame.Angles(0, 0, 0))
 
-            Align(Character["LeftUpperLeg"], Dummy["Left Leg"], Vector3.new(0,0.5792183876037598,0), CFrame.Angles(0, 0, 0))
-            Align(Character["LeftLowerLeg"], Dummy["Left Leg"], Vector3.new(0,-0.20090234279632568,0), CFrame.Angles(0, 0, 0))
-            Align(Character["LeftFoot"], Dummy["Left Leg"], Vector3.new(0,-0.8499990701675415,0), CFrame.Angles(0, 0, 0))
+            Align(Character["LeftUpperLeg"], Dummy["Left Leg"], CFrame.new(0,0.5792183876037598,0), CFrame.Angles(0, 0, 0))
+            Align(Character["LeftLowerLeg"], Dummy["Left Leg"], CFrame.new(0,-0.20090234279632568,0), CFrame.Angles(0, 0, 0))
+            Align(Character["LeftFoot"], Dummy["Left Leg"], CFrame.new(0,-0.8499990701675415,0), CFrame.Angles(0, 0, 0))
 
-            Align(Character.UpperTorso, Dummy.Torso, Vector3.new(0, 0.1999831199645996, 0), CFrame.Angles(0, 0, 0))
-            Align(Character.LowerTorso, Dummy.Torso, Vector3.new(0, -0.8000273704528809, 0), CFrame.Angles(0, 0, 0))
-            Align(Character.HumanoidRootPart, Dummy.HumanoidRootPart, Vector3.new(0, 0, 0), CFrame.Angles(0, 0, 0))
+            Align(Character.UpperTorso, Dummy.Torso, CFrame.new(0, 0.1999831199645996, 0), CFrame.Angles(0, 0, 0))
+            Align(Character.LowerTorso, Dummy.Torso, CFrame.new(0, -0.8000273704528809, 0), CFrame.Angles(0, 0, 0))
             
-            Align(Character.Head, Dummy.Head, Vector3.new(0, 0, 0), CFrame.Angles(0, 0, 0))
+            Align(Character.Head, Dummy.Head, CFrame.new(0, 0, 0), CFrame.Angles(0, 0, 0))
         end
     end)
     
 end
+
+-- Sitting
+
+game.RunService.Stepped:Connect(function()
+    if Humanoid then
+        Humanoid.Sit = false
+    end
+end)
+
+task.wait()
 
 -- Character Set 
 
@@ -215,3 +250,5 @@ game.Players.LocalPlayer.Character = Dummy
 -- Camera Fix
 
 workspace.CurrentCamera.CameraSubject = Dummy.Humanoid
+
+wait(0)
