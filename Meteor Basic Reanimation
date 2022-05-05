@@ -122,9 +122,15 @@ for _,v in pairs(Dummy:GetDescendants()) do
 end
 
 -- Accessories
+
 for _,Ali in pairs(Character:GetChildren()) do
     if Ali:IsA("Accessory") then
         local Hats = Ali;local Clone = Ali:Clone(); Clone.Parent = Dummy
+        local Weld = Instance.new("Weld")
+        Weld.Parent = Hats.Handle
+        Weld.Name = "AccessoryWeld"
+        Weld.C0 = Clone.Handle.AccessoryWeld.C0
+        Weld.C1 = Clone.Handle.AccessoryWeld.C1
     end
 end
 
@@ -250,5 +256,3 @@ game.Players.LocalPlayer.Character = Dummy
 -- Camera Fix
 
 workspace.CurrentCamera.CameraSubject = Dummy.Humanoid
-
-wait(0)
