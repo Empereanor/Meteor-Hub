@@ -1,5 +1,3 @@
--- Note for Charlie / Dont change align code JUST FIX IT FLYNG AWAYYY :sob: /
-
 -- Physics:
 
 settings().Physics.AllowSleep = false
@@ -53,10 +51,18 @@ Dummy.Name = "MeteorReanimate"
 
 Dummy:MoveTo(Root.Position)
 
+-- Accessory Cloning:
+
+for _,Accessory in pairs(Character:GetChildren()) do
+    if Accessory:IsA("Accessory") then
+        local Clone = Accessory:Clone(); Clone.Parent = Dummy
+    end
+end
+
 -- Invisible Rig Body:
 
 for _,Invisible in pairs(Dummy:GetDescendants()) do
-    if Invisible:IsA("BasePart") or Invisible:IsA("Decal") or Invisible:IsA("ForceField") then
+    if Invisible:IsA("BasePart") or Invisible:IsA("Decal") then
         Invisible.Transparency = 1
     end
 end
@@ -102,7 +108,10 @@ end
 -- Functions:
 
 function Align(Part1, Part2, Pos, Angle)
-    Part1.CFrame = Part2.CFrame *Pos *Angle
+    Pos = Pos or CFrame.new(0, 0, 0)
+    Angle = Angle or CFrame.Angles(0, 0, 0)
+
+    Part1.CFrame = Part2.CFrame * Pos * Angle
 end
 
 function LoadLibrary() -- phere's LoadLibrary
@@ -147,7 +156,7 @@ if Humanoid.RigType == Enum.HumanoidRigType.R6 then -- R6 RigBody
         if Netless:IsA("BasePart") then
             spawn(function()
                 while task.wait(1-1) do
-                    Netless.Velocity = Vector3.new(100, -0, -0)
+                    Netless.Velocity = Vector3.new(95, -0, -0)
                 end
             end)
         end
@@ -211,6 +220,18 @@ elseif Humanoid.RigType == Enum.HumanoidRigType.R15 then -- R15 RigBody
     
 else
     error("What rig are u fucking using bro?")
+end
+
+-- Accessory Aligning:
+
+for _,Accessory in pairs(RealCharacter:GetChildren()) do
+    if Accessory:IsA("Accessory") then
+        spawn(function()
+            while task.wait() do
+                Align(RealCharacter[Accessory.Name].Handle, Dummy[Accessory.Name].Handle, CFrame.new(0.01, 0.01, 0.01), CFrame.Angles(0.01, 0.01, 0.01))
+            end
+        end)
+    end
 end
 
 -- Un Anchor:
