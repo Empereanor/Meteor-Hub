@@ -1,16 +1,34 @@
+getgenv().ReanimationSettings = {
+    SimulationRadius = true,
+    Physics = true,
+    RemoveAnimations = true,
+    R15ToR6 = true, -- The Probably only useful Thing In These Settings
+    PermanentDeath = true, -- Doesn't Work Do not turn it to False
+    HumanoidLess = false, -- Why Would u even want this?
+    BodyVelocity = true
+}
+
 -- Physics:
 
-settings().Physics.AllowSleep = false
-settings().Physics.DisableCSGv2 = true
-settings().Physics.PhysicsEnvironmentalThrottle = Enum.EnviromentalPhysicsThrottle.Disabled
+if getgenv().ReanimationSettings.Physics == true then
+
+    settings().Physics.AllowSleep = false
+    settings().Physics.DisableCSGv2 = true
+    settings().Physics.PhysicsEnvironmentalThrottle = Enum.EnviromentalPhysicsThrottle.Disabled
+
+end
 
 -- Simulation Radius:
 
-game:GetService("RunService").RenderStepped:Connect(function()
-    setscriptable(game.Players.LocalPlayer, "SimulationRadius", true)
-    sethiddenproperty(game.Players.LocalPlayer, "MaximumSimulationRadius", math.huge)
-    sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
-end)
+if getgenv().ReanimationSettings.SimulationRadius == true then
+
+    game:GetService("RunService").RenderStepped:Connect(function()
+        setscriptable(game.Players.LocalPlayer, "SimulationRadius", true)
+        sethiddenproperty(game.Players.LocalPlayer, "MaximumSimulationRadius", math.huge)
+        sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+    end)
+
+end
 
 -- Variables:
 
@@ -26,12 +44,16 @@ local UserInputService = game:GetService("UserInputService")
 
 -- Humanoid Settings:
 
-for _,Animations in next, Humanoid:GetPlayingAnimationTracks() do
-    Animations:Stop()
-end
+if getgenv().ReanimationSettings.RemoveAnimations == true then
 
-if Humanoid:FindFirstChild("Animator") then
-    Humanoid.Animator:Destroy()
+    for _,Animations in next, Humanoid:GetPlayingAnimationTracks() do
+        Animations:Stop()
+    end
+
+    if Humanoid:FindFirstChild("Animator") then
+        Humanoid.Animator:Destroy()
+    end
+
 end
 
 Humanoid:ChangeState(16)
@@ -84,6 +106,8 @@ local RealCharacter = Character[Name]
 
 -- Permanent Death:
 
+if getgenv().ReanimationSettings.PermanentDeath == true then
+
 game.Players.LocalPlayer.Character = nil
 game.Players.LocalPlayer.Character = Dummy
 
@@ -96,6 +120,18 @@ task.spawn(function()
         end
     end
 end)
+
+else 
+    
+    for _,Joints in pairs(RealCharacter:GetChildren()) do
+        if Joints:IsA("BasePart") then
+            if Joints.Name ~= "Head" or "Torso" then
+                Joints:BreakJoints()
+            end
+        end
+    end
+    
+end
 
 -- Anchor:
 
@@ -146,6 +182,18 @@ local NoclipConnection; NoclipConnection = RunService.Stepped:Connect(function()
     end
 end)
 
+-- Body Velocity:
+
+if getgenv().ReanimationSettings.BodyVelocity == true then
+
+    for _,Body in pairs(RealCharacter:GetChildren()) do
+        if Body:IsA("BasePart") then
+            local Stability = Instance.new("BodyVelocity"); Stability.Parent = RealCharacter; Stability.Name = "Meteor";Stability.MaxForce = Vector3.new(math.huge, math.huge, math.huge); Stability.Velocity = Vector3.new(0, 0, 0)
+        end
+    end
+
+end
+
 -- Align Section:
 
 if Humanoid.RigType == Enum.HumanoidRigType.R6 then -- R6 RigBody
@@ -156,7 +204,7 @@ if Humanoid.RigType == Enum.HumanoidRigType.R6 then -- R6 RigBody
         if Netless:IsA("BasePart") then
             spawn(function()
                 while task.wait(1-1) do
-                    Netless.Velocity = Vector3.new(95, -0, -0)
+                    Netless.Velocity = Vector3.new(-25.05, 0, 0)
                 end
             end)
         end
@@ -178,49 +226,64 @@ if Humanoid.RigType == Enum.HumanoidRigType.R6 then -- R6 RigBody
     
 elseif Humanoid.RigType == Enum.HumanoidRigType.R15 then -- R15 RigBody
     
-    -- Velocity:
-
-    for _,Netless in pairs(RealCharacter:GetChildren()) do
-        if Netless:IsA("BasePart") then
-            spawn(function()
-                while task.wait(1-1) do
-                    Netless.Velocity = Vector3.new(-0, -0, -55)
-                end
-            end)
-        end
-    end
+    if getgenv().ReanimationSettings.R15ToR6 == true then
     
-    -- Align:
-   
-   spawn(function()
-       while task.wait(1-1) do
-            Align(RealCharacter["RightUpperArm"], Dummy["Right Arm"], CFrame.new(0,0.36867332458496094,0), CFrame.Angles(0,0,0))
-            Align(RealCharacter["RightLowerArm"], Dummy["Right Arm"], CFrame.new(0,-0.22407126426696777,0), CFrame.Angles(0, 0, 0))
-            Align(RealCharacter["RightHand"], Dummy["Right Arm"], CFrame.new(0,-0.8500454425811768,0), CFrame.Angles(0, 0, 0))
+        -- Velocity:
 
-            Align(RealCharacter["LeftUpperArm"], Dummy["Left Arm"], CFrame.new(0,0.36867332458496094,0), CFrame.Angles(0, 0, 0))
-            Align(RealCharacter["LeftLowerArm"], Dummy["Left Arm"], CFrame.new(0,-0.22407126426696777,0), CFrame.Angles(0, 0, 0))
-            Align(RealCharacter["LeftHand"], Dummy["Left Arm"], CFrame.new(0,-0.8500454425811768,0), CFrame.Angles(0, 0, 0))
-
-            Align(RealCharacter["RightUpperLeg"], Dummy["Right Leg"], CFrame.new(0,0.5792183876037598,0), CFrame.Angles(0, 0, 0))
-            Align(RealCharacter["RightLowerLeg"], Dummy["Right Leg"], CFrame.new(0,-0.20090234279632568,0), CFrame.Angles(0, 0, 0))
-            Align(RealCharacter["RightFoot"], Dummy["Right Leg"], CFrame.new(0,-0.8499990701675415,0), CFrame.Angles(0, 0, 0))
-
-            Align(RealCharacter["LeftUpperLeg"], Dummy["Left Leg"], CFrame.new(0,0.5792183876037598,0), CFrame.Angles(0, 0, 0))
-            Align(RealCharacter["LeftLowerLeg"], Dummy["Left Leg"], CFrame.new(0,-0.20090234279632568,0), CFrame.Angles(0, 0, 0))
-            Align(RealCharacter["LeftFoot"], Dummy["Left Leg"], CFrame.new(0,-0.8499990701675415,0), CFrame.Angles(0, 0, 0))
-
-            Align(RealCharacter["HumanoidRootPart"], Dummy.HumanoidRootPart, CFrame.new(0.01, 0.01, 0.01), CFrame.new(0.01, 0.01, 0.01))
-            Align(RealCharacter["UpperTorso"], Dummy.Torso, CFrame.new(0, 0.1999831199645996, 0), CFrame.Angles(0, 0, 0))
-            Align(RealCharacter["LowerTorso"], Dummy.Torso, CFrame.new(0, -0.8000273704528809, 0), CFrame.Angles(0, 0, 0))
-            
-            Align(RealCharacter["Head"], Dummy["Head"], CFrame.new(0, 0, 0), CFrame.Angles(0, 0, 0))
+        for _,Netless in pairs(RealCharacter:GetChildren()) do
+            if Netless:IsA("BasePart") then
+                spawn(function()
+                    while task.wait(1-1) do
+                        Netless.Velocity = Vector3.new(-0, -0, -55)
+                    end
+                end)
+            end
         end
-    end)
+    
+        -- Align:
+   
+        spawn(function()
+            while task.wait(1-1) do
+                Align(RealCharacter["RightUpperArm"], Dummy["Right Arm"], CFrame.new(0,0.36867332458496094,0), CFrame.Angles(0,0,0))
+                Align(RealCharacter["RightLowerArm"], Dummy["Right Arm"], CFrame.new(0,-0.22407126426696777,0), CFrame.Angles(0, 0, 0))
+                Align(RealCharacter["RightHand"], Dummy["Right Arm"], CFrame.new(0,-0.8500454425811768,0), CFrame.Angles(0, 0, 0))
+
+                Align(RealCharacter["LeftUpperArm"], Dummy["Left Arm"], CFrame.new(0,0.36867332458496094,0), CFrame.Angles(0, 0, 0))
+                Align(RealCharacter["LeftLowerArm"], Dummy["Left Arm"], CFrame.new(0,-0.22407126426696777,0), CFrame.Angles(0, 0, 0))
+                Align(RealCharacter["LeftHand"], Dummy["Left Arm"], CFrame.new(0,-0.8500454425811768,0), CFrame.Angles(0, 0, 0))
+
+                Align(RealCharacter["RightUpperLeg"], Dummy["Right Leg"], CFrame.new(0,0.5792183876037598,0), CFrame.Angles(0, 0, 0))
+                Align(RealCharacter["RightLowerLeg"], Dummy["Right Leg"], CFrame.new(0,-0.20090234279632568,0), CFrame.Angles(0, 0, 0))
+                Align(RealCharacter["RightFoot"], Dummy["Right Leg"], CFrame.new(0,-0.8499990701675415,0), CFrame.Angles(0, 0, 0))
+
+                Align(RealCharacter["LeftUpperLeg"], Dummy["Left Leg"], CFrame.new(0,0.5792183876037598,0), CFrame.Angles(0, 0, 0))
+                Align(RealCharacter["LeftLowerLeg"], Dummy["Left Leg"], CFrame.new(0,-0.20090234279632568,0), CFrame.Angles(0, 0, 0))
+                Align(RealCharacter["LeftFoot"], Dummy["Left Leg"], CFrame.new(0,-0.8499990701675415,0), CFrame.Angles(0, 0, 0))
+
+                Align(RealCharacter["HumanoidRootPart"], Dummy.HumanoidRootPart, CFrame.new(0.01, 0.01, 0.01), CFrame.new(0.01, 0.01, 0.01))
+                Align(RealCharacter["UpperTorso"], Dummy.Torso, CFrame.new(0, 0.1999831199645996, 0), CFrame.Angles(0, 0, 0))
+                Align(RealCharacter["LowerTorso"], Dummy.Torso, CFrame.new(0, -0.8000273704528809, 0), CFrame.Angles(0, 0, 0))
+            
+                Align(RealCharacter["Head"], Dummy["Head"], CFrame.new(0, 0, 0), CFrame.Angles(0, 0, 0))
+            end
+        end)
+   
+   end
     
 else
     error("What rig are u fucking using bro?")
 end
+
+-- HumanoidLess:
+
+if getgenv().ReanimationSettings.HumanoidLess == true then
+    
+    if Dummy:FindFirstChildWhichIsA("Humanoid") then
+        Humanoid:Destroy()
+    end
+    
+end
+
 
 -- Accessory Aligning:
 
