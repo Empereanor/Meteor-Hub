@@ -1,4 +1,6 @@
 getgenv().ReanimationSettings = {
+    R6Velocity = Vector3.new(-30, 0, 0),
+    R15Velocity = Vector3.new(0, 0, -55),
     SimulationRadius = true,
     Physics = true,
     RemoveAnimations = true,
@@ -53,6 +55,10 @@ if getgenv().ReanimationSettings.RemoveAnimations == true then
     if Humanoid:FindFirstChild("Animator") then
         Humanoid.Animator:Destroy()
     end
+    
+    if Character:FindFirstChild("Animate") then
+        Character.Animate:Destroy()
+    end
 
 end
 
@@ -66,20 +72,14 @@ Humanoid.AutoJumpEnabled = false
 
 -- Rig Body:
 
-local Dummy = game:GetObjects("rbxassetid://9570701779")[1] -- phere's RigBody
+Character.Archivable = true
+
+local Dummy = Character:Clone()--game:GetObjects("rbxassetid://9570701779")[1] -- phere's RigBody
 
 Dummy.Parent = Workspace
 Dummy.Name = "MeteorReanimate"
 
 Dummy:MoveTo(Root.Position)
-
--- Accessory Cloning:
-
-for _,Accessory in pairs(Character:GetChildren()) do
-    if Accessory:IsA("Accessory") then
-        local Clone = Accessory:Clone(); Clone.Parent = Dummy
-    end
-end
 
 -- Invisible Rig Body:
 
@@ -92,10 +92,6 @@ end
 -- Character Settings:
 
 Character.Archivable = true -- Just in Case
-
-if Character:FindFirstChild("Animate") then
-    Character.Animate:Destroy()
-end
 
 -- Updating Variables:
 
@@ -133,20 +129,11 @@ else
     
 end
 
--- Anchor:
-
-for _,Anchor in pairs(Dummy:GetChildren()) do
-    if Anchor:IsA("BasePart") then
-        Anchor.Anchored = true
-    end
-end
-
 -- Functions:
 
 function Align(Part1, Part2, Pos, Angle)
     Pos = Pos or CFrame.new(0, 0, 0)
     Angle = Angle or CFrame.Angles(0, 0, 0)
-
     Part1.CFrame = Part2.CFrame * Pos * Angle
 end
 
@@ -200,11 +187,11 @@ if Humanoid.RigType == Enum.HumanoidRigType.R6 then -- R6 RigBody
     
     -- Velocity:
 
-    for _,Netless in pairs(RealCharacter:GetChildren()) do
+    for _,Netless in pairs(RealCharacter:GetDescendants()) do
         if Netless:IsA("BasePart") then
             spawn(function()
                 while task.wait(1-1) do
-                    Netless.Velocity = Vector3.new(-25.05, 0, 0)
+                    Netless.AssemblyLinearVelocity = getgenv().ReanimationSettings.R6Velocity
                 end
             end)
         end
@@ -214,6 +201,17 @@ if Humanoid.RigType == Enum.HumanoidRigType.R6 then -- R6 RigBody
     
     spawn(function()
         while task.wait() do
+            
+            for _,Accessory1 in pairs(RealCharacter:GetChildren()) do
+                if Accessory1:IsA("Accessory") then
+                    for _,Accessory2 in pairs(Dummy:GetChildren()) do
+                        if Accessory2:IsA("Accessory") then
+                            Align(RealCharacter[Accessory1.Name].Handle, Dummy[Accessory1.Name].Handle, CFrame.new(0, 0, 0), CFrame.Angles(0, 0, 0))
+                        end
+                    end
+                end
+            end
+            
             Align(RealCharacter["Head"], Character["Head"], CFrame.new(0.01, 0.01, 0.01), CFrame.Angles(0.01, 0.01, 0.01))
             Align(RealCharacter["Torso"], Character["Torso"], CFrame.new(0.01, 0.01, 0.01), CFrame.Angles(0.01, 0.01, 0.01))
             Align(RealCharacter["HumanoidRootPart"], Dummy["HumanoidRootPart"], CFrame.new(0.01, 0.01, 0.01), CFrame.new(0.01, 0.01, 0.01))
@@ -228,13 +226,22 @@ elseif Humanoid.RigType == Enum.HumanoidRigType.R15 then -- R15 RigBody
     
     if getgenv().ReanimationSettings.R15ToR6 == true then
     
+        local Dummy = game:GetObjects("rbxassetid://9570701779")[1]
+        
+        for _,Cloning in pairs(RealCharacter:GetChildren()) do
+            if Cloning:IsA("Accessory") then
+                local FakeAccessories = Cloning:Clone()
+                FakeAccessories.Parent = Dummy
+            end
+        end
+    
         -- Velocity:
 
-        for _,Netless in pairs(RealCharacter:GetChildren()) do
+        for _,Netless in pairs(RealCharacter:GetDescendants()) do
             if Netless:IsA("BasePart") then
                 spawn(function()
                     while task.wait(1-1) do
-                        Netless.Velocity = Vector3.new(-0, -0, -55)
+                        Netless.AssemblyLinearVelocity = getgenv().ReanimationSettings.R15Velocity
                     end
                 end)
             end
@@ -244,6 +251,17 @@ elseif Humanoid.RigType == Enum.HumanoidRigType.R15 then -- R15 RigBody
    
         spawn(function()
             while task.wait(1-1) do
+                
+                for _,Accessory1 in pairs(RealCharacter:GetChildren()) do
+                    if Accessory1:IsA("Accessory") then
+                        for _,Accessory2 in pairs(Dummy:GetChildren()) do
+                            if Accessory2:IsA("Accessory") then
+                                Align(RealCharacter[Accessory1.Name].Handle, Dummy[Accessory1.Name].Handle, CFrame.new(0, 0, 0), CFrame.Angles(0, 0, 0))
+                            end
+                        end
+                    end
+                end
+                
                 Align(RealCharacter["RightUpperArm"], Dummy["Right Arm"], CFrame.new(0,0.36867332458496094,0), CFrame.Angles(0,0,0))
                 Align(RealCharacter["RightLowerArm"], Dummy["Right Arm"], CFrame.new(0,-0.22407126426696777,0), CFrame.Angles(0, 0, 0))
                 Align(RealCharacter["RightHand"], Dummy["Right Arm"], CFrame.new(0,-0.8500454425811768,0), CFrame.Angles(0, 0, 0))
@@ -269,7 +287,6 @@ elseif Humanoid.RigType == Enum.HumanoidRigType.R15 then -- R15 RigBody
         end)
    
    end
-    
 else
     error("What rig are u fucking using bro?")
 end
@@ -282,27 +299,6 @@ if getgenv().ReanimationSettings.HumanoidLess == true then
         Humanoid:Destroy()
     end
     
-end
-
-
--- Accessory Aligning:
-
-for _,Accessory in pairs(RealCharacter:GetChildren()) do
-    if Accessory:IsA("Accessory") then
-        spawn(function()
-            while task.wait() do
-                Align(RealCharacter[Accessory.Name].Handle, Dummy[Accessory.Name].Handle, CFrame.new(0.01, 0.01, 0.01), CFrame.Angles(0.01, 0.01, 0.01))
-            end
-        end)
-    end
-end
-
--- Un Anchor:
-
-for _,UnAnchor in pairs(Dummy:GetChildren()) do
-    if UnAnchor:IsA("BasePart") then
-        UnAnchor.Anchored = false
-    end
 end
 
 -- Camera:
