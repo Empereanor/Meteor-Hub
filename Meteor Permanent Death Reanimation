@@ -72,11 +72,12 @@ Humanoid.AutoJumpEnabled = false
 
 -- Rig Body:
 
-Character.Archivable = true
+Character.Archivable = true 
 
-local Dummy = Character:Clone()--game:GetObjects("rbxassetid://9570701779")[1] -- phere's RigBody
+local Dummy = Humanoid.RigType == Enum.HumanoidRigType.R6 and Character:Clone() or game:GetObjects("rbxassetid://9570701779")[1]
 
-Dummy.Parent = Workspace
+
+Dummy.Parent = game:GetService("Workspace")
 Dummy.Name = "MeteorReanimate"
 
 Dummy:MoveTo(Root.Position)
@@ -88,10 +89,6 @@ for _,Invisible in pairs(Dummy:GetDescendants()) do
         Invisible.Transparency = 1
     end
 end
-
--- Character Settings:
-
-Character.Archivable = true -- Just in Case
 
 -- Updating Variables:
 
@@ -226,7 +223,7 @@ elseif Humanoid.RigType == Enum.HumanoidRigType.R15 then -- R15 RigBody
     
     if getgenv().ReanimationSettings.R15ToR6 == true then
     
-        local Dummy = game:GetObjects("rbxassetid://9570701779")[1]
+        --local Dummy = game:GetObjects("rbxassetid://9570701779")[1]
         
         for _,Cloning in pairs(RealCharacter:GetChildren()) do
             if Cloning:IsA("Accessory") then
@@ -261,6 +258,8 @@ elseif Humanoid.RigType == Enum.HumanoidRigType.R15 then -- R15 RigBody
                         end
                     end
                 end
+                
+                
                 
                 Align(RealCharacter["RightUpperArm"], Dummy["Right Arm"], CFrame.new(0,0.36867332458496094,0), CFrame.Angles(0,0,0))
                 Align(RealCharacter["RightLowerArm"], Dummy["Right Arm"], CFrame.new(0,-0.22407126426696777,0), CFrame.Angles(0, 0, 0))
