@@ -1,0 +1,430 @@
+-- Physics:
+
+if getgenv().ReanimationSettings.Physics == true then
+    settings().Physics.AllowSleep = false
+    settings().Physics.DisableCSGv2 = true
+    settings().Physics.PhysicsEnvironmentalThrottle = Enum.EnviromentalPhysicsThrottle.Disabled
+end
+
+-- Simulation Radius:
+
+if getgenv().ReanimationSettings.SimulationRadius == true then
+    game:GetService("RunService").RenderStepped:Connect(function()
+        setscriptable(game.Players.LocalPlayer, "SimulationRadius", true)
+        sethiddenproperty(game.Players.LocalPlayer, "MaximumSimulationRadius", math.huge)
+        sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+    end)
+end
+
+-- Variables:
+
+local Workspace = game:GetService("Workspace") and workspace
+local Player = game:GetService("Players").LocalPlayer
+local Mouse = Player:GetMouse()
+local Name = Player.Name
+local Character = Player.Character or Workspace[Name]
+local Root = Character.HumanoidRootPart
+local Humanoid = Character:FindFirstChildWhichIsA("Humanoid")
+local PhysicsService = game:GetService("PhysicsService")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+-- Animations:
+
+if getgenv().ReanimationSettings.RemoveAnimations == true then
+
+    for _,Animations in next, Humanoid:GetPlayingAnimationTracks() do
+        Animations:Stop()
+    end
+
+    if Humanoid:FindFirstChild("Animator") then
+        Humanoid.Animator:Destroy()
+    end
+    
+    if Character:FindFirstChild("Animate") then
+        Character.Animate:Destroy()
+    end
+
+end
+
+-- Rig Body:
+
+Character.Archivable = true 
+
+local Dummy = getgenv().ReanimationSettings.R6 == true and Character:Clone() or getgenv().ReanimationSettings.R6ToR15 == true and game:GetObjects("rbxassetid://9650067548")[1] or getgenv().ReanimationSettings.R15ToR6 == true and game:GetObjects("rbxassetid://9570701779")[1] or getgenv().ReanimationSettings.R15 == true and game:GetObjects("rbxassetid://9650067548")[1]
+
+--game:GetObjects("rbxassetid://9650067548")[1] --R15
+--game:GetObjects("rbxassetid://9570701779")[1] --R6
+
+Dummy.Parent = game:GetService("Workspace")
+Dummy.Name = "nil"
+
+Dummy:MoveTo(Root.Position)
+    
+-- Invisible Rig Body:
+
+for _,Invisible in pairs(Dummy:GetDescendants()) do
+    if Invisible:IsA("BasePart") or Invisible:IsA("Decal") then
+        Invisible.Transparency = 1
+    end
+end
+
+-- Updating Variables:
+
+Character.Parent = Dummy
+
+local Character = Dummy
+local RealCharacter = Character[Name]
+local Humanoid = RealCharacter:FindFirstChildOfClass("Humanoid")
+local FakeHumanoid = Dummy:FindFirstChildOfClass("Humanoid")
+
+-- Accessories: /R15 And R6/
+
+if getgenv().ReanimationSettings.R15ToR6 == true or getgenv().ReanimationSettings.R6ToR15 == true or getgenv().ReanimationSettings.R15 == true then
+    for _,Access1 in pairs(RealCharacter:GetChildren()) do -- Method By Phere
+        if Access1:IsA("Accessory") then
+            local FakeHats = Access1:Clone()
+            FakeHats.Parent = Dummy
+            local DummyAtt = FakeHats.Handle:FindFirstChildOfClass("Attachment")
+            local RealAtt
+            for _,Attachment in pairs(Dummy:GetChildren()) do
+                if Attachment:IsA("BasePart") then
+                    for _,Other in pairs(Dummy:GetDescendants()) do
+                        if Other.Name == DummyAtt.Name then
+                            RealAtt = Other
+                            break
+                        end
+                    end
+                    if RealAtt then break end
+                end
+            end
+            local NewWeld = Instance.new("Weld", FakeHats.Handle)
+            NewWeld.Name = "AccessoryWeld"
+            NewWeld.Part0 = FakeHats.Handle
+            NewWeld.Part1 = RealAtt.Parent
+            NewWeld.C0 = DummyAtt.CFrame
+            NewWeld.C1 = RealAtt.CFrame
+        end
+    end
+end
+
+-- Accessories Transparency:
+
+for _,Invisible in pairs(Dummy:GetChildren()) do
+    if Invisible:IsA("Accessory") then
+        Invisible.Handle.Transparency = 1
+    end
+end
+
+-- Permanent Death:
+
+if getgenv().ReanimationSettings.PermanentDeath == true then
+
+    game.Players.LocalPlayer.Character = nil
+    game.Players.LocalPlayer.Character = Dummy
+
+    wait(game.Players.RespawnTime + .35)
+
+    task.spawn(function()
+        for _,Permanent in pairs(RealCharacter:GetDescendants()) do
+            if Permanent:IsA("Motor6D") or Permanent:IsA("Weld") or Permanent:IsA("BallSocketConstraint") or Permanent:IsA("HingeConstraint") then
+                Permanent:Destroy()
+            end
+        end
+    end)
+
+else 
+    for _,Joints in pairs(RealCharacter:GetDescendants()) do
+        if Joints:IsA("BasePart") then
+            if Joints.Name ~= "Head" or "Torso" or "UpperTorso" or "LowerTorso" then
+                Joints:BreakJoints()
+            end
+        end
+    end
+end
+
+-- Humanoid Settings:
+
+Humanoid:ChangeState(16)
+
+Humanoid.WalkSpeed = 0 
+Humanoid.JumpPower = 0 
+
+Humanoid.AutoRotate = false
+Humanoid.AutoJumpEnabled = false
+
+-- Functions:
+
+function Align(Part1, Part2, Pos, Angle)
+    Pos = Pos or CFrame.new(0, 0, 0)
+    Angle = Angle or CFrame.Angles(0, 0, 0)
+    Part1.CFrame = Part2.CFrame * Pos * Angle
+end
+
+function Flinger(Part)
+    
+    Part.Transparency = 0.5
+
+    local Fling = Instance.new("BodyAngularVelocity")
+    Fling.Parent = Part; Fling.Name = "Meteor"; Fling.MaxTorque = Vector3.new(math.huge, math.huge, math.huge); Fling.AngularVelocity = Vector3.new(999, 999, 999)
+    
+    local Stability = Instance.new("BodyVelocity")
+    Stability.Parent = Part; Stability.Name = "Meteor"; Stability.MaxForce = Vector3.new(math.huge, math.huge, math.huge); Stability.Velocity = Vector3.new(0, 0, 0)
+    
+    Enabled = false
+    
+    Mouse.Button1Down:Connect(function()
+        Enabled = true
+    end)
+    
+    Mouse.Button1Up:Connect(function()
+        Enabled = false
+    end)
+    
+    while task.wait() do
+        if Enabled == true then
+            Part.CFrame = Mouse.Hit
+        elseif Enabled == false then
+            Part.CFrame = Dummy.HumanoidRootPart.CFrame
+        end
+    end
+    
+end
+
+function LoadLibrary() -- phere's LoadLibrary
+    return loadstring(game:HttpGet("https://pastebin.com/raw/UfzKgS6T", true))()
+end
+
+-- No-Clip:
+
+loadstring(game:HttpGet("https://raw.githubusercontent.com/LegoHacker1337/legohacks/main/PhysicsServiceOnClient.lua"))()
+
+if not pcall(function() PhysicsService:GetCollisionGroupId("NoCollide") end) then 
+    PhysicsService:CreateCollisionGroup("NoCollide")
+    PhysicsService:CollisionGroupSetCollidable("NoCollide", "NoCollide", false)
+end
+
+for _,NoClip in pairs(Dummy:GetDescendants()) do
+    if NoClip:IsA("BasePart") then
+        PhysicsService:SetPartCollisionGroup(NoClip, "NoCollide")
+    end
+end
+
+local NoclipConnection; NoclipConnection = RunService.Stepped:Connect(function()
+    if not Character:IsDescendantOf(game) or not Dummy:IsDescendantOf(game) then
+        NoclipConnection:Disconnect()
+        return
+    end
+    
+    for _, Object in pairs(Dummy:GetChildren()) do
+        if Object:IsA("BasePart") then
+            Object.CanCollide = false
+        end
+    end
+end)
+
+-- Body Velocity:
+
+if getgenv().ReanimationSettings.BodyVelocity == true then
+    for _,Body in pairs(RealCharacter:GetChildren()) do
+        if Body:IsA("BasePart") and Body.Name == "Head" then
+            local Stability = Instance.new("BodyVelocity"); Stability.Parent = RealCharacter; Stability.Name = "Meteor";Stability.MaxForce = Vector3.new(math.huge, math.huge, math.huge); Stability.Velocity = Vector3.new(0, 0, 0)
+        end
+    end
+end
+
+-- Align Section:
+
+if Humanoid.RigType == Enum.HumanoidRigType.R6 then -- R6 RigBody
+    
+    -- Velocity:
+
+    for _,Netless in pairs(RealCharacter:GetDescendants()) do
+        if Netless:IsA("BasePart") then
+            spawn(function()
+                while task.wait(1-1) do
+                    Netless.AssemblyLinearVelocity = getgenv().ReanimationSettings.R6Velocity
+                end
+            end)
+        end
+    end
+    
+    if getgenv().ReanimationSettings.R6ToR15 == true and getgenv().ReanimationSettings.R6 == false then
+                
+        task.spawn(function()
+            while task.wait() do
+                pcall(function()
+                for _,Accessory1 in pairs(RealCharacter:GetChildren()) do
+                    if Accessory1:IsA("Accessory") then
+                        for _,Accessory2 in pairs(Dummy:GetChildren()) do
+                            if Accessory2:IsA("Accessory") then
+                                Align(RealCharacter[Accessory1.Name].Handle, Dummy[Accessory1.Name].Handle, CFrame.new(0, 0, 0), CFrame.Angles(0, 0, 0))
+                            end
+                        end
+                    end
+                end
+                Align(RealCharacter["Right Arm"], Dummy.RightHand, CFrame.new(0,0.8500173091888428,0))
+                Align(RealCharacter["Left Arm"], Dummy.LeftHand, CFrame.new(0,0.8500173091888428,0))
+                Align(RealCharacter["Right Leg"], Dummy.RightLowerLeg, CFrame.new(0,0.05001711845397949,0))
+                Align(RealCharacter["Left Leg"], Dummy.LeftLowerLeg, CFrame.new(0,0.05001711845397949,0))
+                Align(RealCharacter["Torso"], Dummy.UpperTorso, CFrame.new(0, -0.1999826431274414, 0))
+                Align(RealCharacter["HumanoidRootPart"], Dummy.HumanoidRootPart, CFrame.new(0, 0, 0))
+                Align(RealCharacter["Head"], Dummy.Head, CFrame.new(0, 0, 0))
+                end)
+            end
+        end)
+            
+    elseif getgenv().ReanimationSettings.R6 == true and getgenv().ReanimationSettings.R6ToR15 == false then
+        
+        task.spawn(function()
+            RunService.Heartbeat:Connect(function()
+                for _,Accessory1 in pairs(RealCharacter:GetChildren()) do
+                    if Accessory1:IsA("Accessory") then
+                        for _,Accessory2 in pairs(Dummy:GetChildren()) do
+                            if Accessory2:IsA("Accessory") then
+                                Align(RealCharacter[Accessory1.Name].Handle, Dummy[Accessory1.Name].Handle, CFrame.new(0, 0, 0), CFrame.Angles(0, 0, 0))
+                            end
+                        end
+                    end
+                end
+                pcall(function()
+                Align(RealCharacter["Head"], Dummy["Head"], CFrame.new(0.01, 0, 0.01), CFrame.Angles(0.01, 0.01, 0.01))
+                Align(RealCharacter["Torso"], Dummy["Torso"], CFrame.new(0.01, 0.01, 0.01), CFrame.Angles(0.01, 0.01, 0.01))
+                Align(RealCharacter["HumanoidRootPart"], Dummy["HumanoidRootPart"], CFrame.new(0.01, 0.01, 0.01), CFrame.Angles(0.01, 0.01, 0.01))
+                Align(RealCharacter["Right Arm"], Dummy["Right Arm"], CFrame.new(0.01, 0.01, 0.01), CFrame.Angles(0.01, 0.01, 0.01))
+                Align(RealCharacter["Left Arm"], Dummy["Left Arm"], CFrame.new(0.01, 0.01, 0.01), CFrame.Angles(0.01, 0.01, 0.01))
+                Align(RealCharacter["Right Leg"], Dummy["Right Leg"], CFrame.new(0.01, 0.01, 0.01), CFrame.Angles(0.01, 0.01, 0.01))
+                Align(RealCharacter["Left Leg"], Dummy["Left Leg"], CFrame.new(0.01, 0.01, 0.01), CFrame.Angles(0.01, 0.01, 0.01))
+                end)
+            end)
+        end)
+    end
+        
+        
+elseif Humanoid.RigType == Enum.HumanoidRigType.R15 then -- R15 RigBody
+    
+    -- Velocity:
+
+    for _,Netless in pairs(RealCharacter:GetDescendants()) do
+        if Netless:IsA("BasePart") then
+            spawn(function()
+                while task.wait(1-1) do
+                    Netless.AssemblyLinearVelocity = getgenv().ReanimationSettings.R15Velocity
+                end
+            end)
+        end
+    end
+    
+    if getgenv().ReanimationSettings.R15ToR6 == true then
+
+        -- Align:
+   
+        task.spawn(function()
+            RunService.Heartbeat:Connect(function()
+                pcall(function()
+                for _,Accessory1 in pairs(RealCharacter:GetChildren()) do
+                    if Accessory1:IsA("Accessory") then
+                        for _,Accessory2 in pairs(Dummy:GetChildren()) do
+                            if Accessory2:IsA("Accessory") then
+                                Align(RealCharacter[Accessory1.Name].Handle, Dummy[Accessory1.Name].Handle, CFrame.new(0, 0, 0), CFrame.Angles(0, 0, 0))
+                            end
+                        end
+                    end
+                end
+                
+                Align(RealCharacter["RightUpperArm"], Dummy["Right Arm"], CFrame.new(0,0.36867332458496094,0), CFrame.Angles(0,0,0))
+                Align(RealCharacter["RightLowerArm"], Dummy["Right Arm"], CFrame.new(0,-0.22407126426696777,0), CFrame.Angles(0, 0, 0))
+                Align(RealCharacter["RightHand"], Dummy["Right Arm"], CFrame.new(0,-0.8500454425811768,0), CFrame.Angles(0, 0, 0))
+
+                Align(RealCharacter["LeftUpperArm"], Dummy["Left Arm"], CFrame.new(0,0.36867332458496094,0), CFrame.Angles(0, 0, 0))
+                Align(RealCharacter["LeftLowerArm"], Dummy["Left Arm"], CFrame.new(0,-0.22407126426696777,0), CFrame.Angles(0, 0, 0))
+                Align(RealCharacter["LeftHand"], Dummy["Left Arm"], CFrame.new(0,-0.8500454425811768,0), CFrame.Angles(0, 0, 0))
+                    
+                Align(RealCharacter["RightUpperLeg"], Dummy["Right Leg"], CFrame.new(0,0.5792183876037598,0), CFrame.Angles(0, 0, 0))
+                Align(RealCharacter["RightLowerLeg"], Dummy["Right Leg"], CFrame.new(0,-0.20090234279632568,0), CFrame.Angles(0, 0, 0))
+                Align(RealCharacter["RightFoot"], Dummy["Right Leg"], CFrame.new(0,-0.8499990701675415,0), CFrame.Angles(0, 0, 0))
+                
+                Align(RealCharacter["LeftUpperLeg"], Dummy["Left Leg"], CFrame.new(0,0.5792183876037598,0), CFrame.Angles(0, 0, 0))
+                Align(RealCharacter["LeftLowerLeg"], Dummy["Left Leg"], CFrame.new(0,-0.20090234279632568,0), CFrame.Angles(0, 0, 0))
+                Align(RealCharacter["LeftFoot"], Dummy["Left Leg"], CFrame.new(0,-0.8499990701675415,0), CFrame.Angles(0, 0, 0))
+                
+                Align(RealCharacter["HumanoidRootPart"], Dummy.HumanoidRootPart, CFrame.new(0.01, 0.01, 0.01), CFrame.new(0.01, 0.01, 0.01))
+                Align(RealCharacter["UpperTorso"], Dummy.Torso, CFrame.new(0, 0.1999831199645996, 0), CFrame.Angles(0, 0, 0))
+                Align(RealCharacter["LowerTorso"], Dummy.Torso, CFrame.new(0, -0.8000273704528809, 0), CFrame.Angles(0, 0, 0))
+                    
+                Align(RealCharacter["Head"], Dummy["Head"], CFrame.new(0, 0, 0), CFrame.Angles(0, 0, 0))
+                end)
+            end)
+        end)
+    end
+    
+    if getgenv().ReanimationSettings.R15 == true then
+
+        -- Align:
+   
+        task.spawn(function()
+            RunService.Heartbeat:Connect(function()
+                pcall(function()
+                for _,Accessory1 in pairs(RealCharacter:GetChildren()) do
+                    if Accessory1:IsA("Accessory") then
+                        for _,Accessory2 in pairs(Dummy:GetChildren()) do
+                            if Accessory2:IsA("Accessory") then
+                                Align(RealCharacter[Accessory1.Name].Handle, Dummy[Accessory1.Name].Handle, CFrame.new(0, 0, 0), CFrame.Angles(0, 0, 0))
+                            end
+                        end
+                    end
+                end
+                
+                Align(RealCharacter["RightUpperArm"], Dummy["RightUpperArm"], CFrame.new(0,0,0), CFrame.Angles(0,0,0))
+                Align(RealCharacter["RightLowerArm"], Dummy["RightLowerArm"], CFrame.new(0,0,0), CFrame.Angles(0,0,0))
+                Align(RealCharacter["RightHand"], Dummy["RightHand"], CFrame.new(0,0,0), CFrame.Angles(0,0,0))
+                
+                Align(RealCharacter["LeftUpperArm"], Dummy["LeftUpperArm"], CFrame.new(0,0,0), CFrame.Angles(0,0,0))
+                Align(RealCharacter["LeftLowerArm"], Dummy["LeftLowerArm"], CFrame.new(0,0,0), CFrame.Angles(0,0,0))
+                Align(RealCharacter["LeftHand"], Dummy["LeftHand"], CFrame.new(0,0,0), CFrame.Angles(0,0,0))
+                
+                Align(RealCharacter["RightUpperLeg"], Dummy["RightUpperLeg"], CFrame.new(0,0,0), CFrame.Angles(0,0,0))
+                Align(RealCharacter["RightLowerLeg"], Dummy["RightLowerLeg"], CFrame.new(0,0,0), CFrame.Angles(0,0,0))
+                Align(RealCharacter["RightFoot"], Dummy["RightFoot"], CFrame.new(0,0,0), CFrame.Angles(0,0,0))
+                
+                Align(RealCharacter["LeftUpperLeg"], Dummy["LeftUpperLeg"], CFrame.new(0,0,0), CFrame.Angles(0,0,0))
+                Align(RealCharacter["LeftLowerLeg"], Dummy["LeftLowerLeg"], CFrame.new(0,0,0), CFrame.Angles(0,0,0))
+                Align(RealCharacter["LeftFoot"], Dummy["LeftFoot"], CFrame.new(0,0,0), CFrame.Angles(0,0,0))
+                
+                Align(RealCharacter["UpperTorso"], Dummy["UpperTorso"], CFrame.new(0,0,0), CFrame.Angles(0,0,0))
+                Align(RealCharacter["LowerTorso"], Dummy["LowerTorso"], CFrame.new(0,0,0), CFrame.Angles(0,0,0))
+                
+                Align(RealCharacter["Head"], Dummy["Head"], CFrame.new(0,0,0), CFrame.Angles(0,0,0))
+                end)
+            end)
+        end)
+    end
+else
+    error("What rig are u fucking using bro?")
+end
+
+-- HumanoidLess:
+
+if getgenv().ReanimationSettings.HumanoidLess == true then
+    if Dummy:FindFirstChildWhichIsA("Humanoid") then
+        Humanoid:Destroy()
+    end
+end
+
+-- Camera:
+
+workspace.CurrentCamera.CameraSubject = Dummy.Humanoid
+
+-- Animations: / Credits to Phere who gave me them Some Time Ago /
+
+if getgenv().ReanimationSettings.R6Animations == true then -- R6 Animations
+    if FakeHumanoid.RigType == Enum.HumanoidRigType.R6 then 
+        spawn(function()local a=Dummy;local b=a:WaitForChild("Torso")local c=b:WaitForChild("Right Shoulder")local d=b:WaitForChild("Left Shoulder")local e=b:WaitForChild("Right Hip")local f=b:WaitForChild("Left Hip")local g=b:WaitForChild("Neck")local h=a:WaitForChild("Humanoid")local i="Standing"local j=""local k=nil;local l=nil;local m=nil;local n=1.0;local o={}local p={idle={{id="http://www.roblox.com/asset/?id=180435571",weight=9},{id="http://www.roblox.com/asset/?id=180435792",weight=1}},walk={{id="http://www.roblox.com/asset/?id=180426354",weight=10}},run={{id="run.xml",weight=10}},jump={{id="http://www.roblox.com/asset/?id=125750702",weight=10}},fall={{id="http://www.roblox.com/asset/?id=180436148",weight=10}},climb={{id="http://www.roblox.com/asset/?id=180436334",weight=10}},sit={{id="http://www.roblox.com/asset/?id=178130996",weight=10}},toolnone={{id="http://www.roblox.com/asset/?id=182393478",weight=10}},toolslash={{id="http://www.roblox.com/asset/?id=129967390",weight=10}},toollunge={{id="http://www.roblox.com/asset/?id=129967478",weight=10}},wave={{id="http://www.roblox.com/asset/?id=128777973",weight=10}},point={{id="http://www.roblox.com/asset/?id=128853357",weight=10}},dance1={{id="http://www.roblox.com/asset/?id=182435998",weight=10},{id="http://www.roblox.com/asset/?id=182491037",weight=10},{id="http://www.roblox.com/asset/?id=182491065",weight=10}},dance2={{id="http://www.roblox.com/asset/?id=182436842",weight=10},{id="http://www.roblox.com/asset/?id=182491248",weight=10},{id="http://www.roblox.com/asset/?id=182491277",weight=10}},dance3={{id="http://www.roblox.com/asset/?id=182436935",weight=10},{id="http://www.roblox.com/asset/?id=182491368",weight=10},{id="http://www.roblox.com/asset/?id=182491423",weight=10}},laugh={{id="http://www.roblox.com/asset/?id=129423131",weight=10}},cheer={{id="http://www.roblox.com/asset/?id=129423030",weight=10}}}local q={"dance1","dance2","dance3"}local r={wave=false,point=false,dance1=true,dance2=true,dance3=true,laugh=false,cheer=false}function configureAnimationSet(s,t)if o[s]~=nil then for u,v in pairs(o[s].connections)do v:disconnect()end end;o[s]={}o[s].count=0;o[s].totalWeight=0;o[s].connections={}local w=script:FindFirstChild(s)if w~=nil then table.insert(o[s].connections,w.ChildAdded:connect(function(x)configureAnimationSet(s,t)end))table.insert(o[s].connections,w.ChildRemoved:connect(function(x)configureAnimationSet(s,t)end))local y=1;for u,z in pairs(w:GetChildren())do if z:IsA("Animation")then table.insert(o[s].connections,z.Changed:connect(function(A)configureAnimationSet(s,t)end))o[s][y]={}o[s][y].anim=z;local B=z:FindFirstChild("Weight")if B==nil then o[s][y].weight=1 else o[s][y].weight=B.Value end;o[s].count=o[s].count+1;o[s].totalWeight=o[s].totalWeight+o[s][y].weight;y=y+1 end end end;if o[s].count<=0 then for y,C in pairs(t)do o[s][y]={}o[s][y].anim=Instance.new("Animation")o[s][y].anim.Name=s;o[s][y].anim.AnimationId=C.id;o[s][y].weight=C.weight;o[s].count=o[s].count+1;o[s].totalWeight=o[s].totalWeight+C.weight end end end;function scriptChildModified(x)local t=p[x.Name]if t~=nil then configureAnimationSet(x.Name,t)end end;script.ChildAdded:connect(scriptChildModified)script.ChildRemoved:connect(scriptChildModified)local D=h["Animator"]if D then local E=D:GetPlayingAnimationTracks()for F,G in ipairs(E)do G:Stop(0)G:Destroy()end end;for s,t in pairs(p)do configureAnimationSet(s,t)end;local H="None"local I=0;local J=0;local K=0.3;local L=0.1;local M=0.3;local N=0.75;function stopAllAnimations()local O=j;if r[O]~=nil and r[O]==false then O="idle"end;j=""k=nil;if m~=nil then m:disconnect()end;if l~=nil then l:Stop()l:Destroy()l=nil end;return O end;function setAnimationSpeed(P)if P~=n then n=P;l:AdjustSpeed(n)end end;function keyFrameReachedFunc(Q)if Q=="End"then local R=j;if r[R]~=nil and r[R]==false then R="idle"end;local S=n;playAnimation(R,0.0,h)setAnimationSpeed(S)end end;function playAnimation(T,U,V)local W=math.random(1,o[T].totalWeight)local X=W;local y=1;while W>o[T][y].weight do W=W-o[T][y].weight;y=y+1 end;local C=o[T][y].anim;if C~=k then if l~=nil then l:Stop(U)l:Destroy()end;n=1.0;l=V:LoadAnimation(C)l.Priority=Enum.AnimationPriority.Core;l:Play(U)j=T;k=C;if m~=nil then m:disconnect()end;m=l.KeyframeReached:connect(keyFrameReachedFunc)end end;local Y=""local Z=nil;local _=nil;local a0=nil;function toolKeyFrameReachedFunc(Q)if Q=="End"then playToolAnimation(Y,0.0,h)end end;function playToolAnimation(T,U,V,a1)local W=math.random(1,o[T].totalWeight)local X=W;local y=1;while W>o[T][y].weight do W=W-o[T][y].weight;y=y+1 end;local C=o[T][y].anim;if _~=C then if Z~=nil then Z:Stop()Z:Destroy()U=0 end;Z=V:LoadAnimation(C)if a1 then Z.Priority=a1 end;Z:Play(U)Y=T;_=C;a0=Z.KeyframeReached:connect(toolKeyFrameReachedFunc)end end;function stopToolAnimations()local O=Y;if a0~=nil then a0:disconnect()end;Y=""_=nil;if Z~=nil then Z:Stop()Z:Destroy()Z=nil end;return O end;function onRunning(P)if P>0.01 then playAnimation("walk",0.1,h)if k and k.AnimationId=="http://www.roblox.com/asset/?id=180426354"then setAnimationSpeed(P/14.5)end;i="Running"else if r[j]==nil then playAnimation("idle",0.1,h)i="Standing"end end end;function onDied()i="Dead"end;function onJumping()playAnimation("jump",0.1,h)J=K;i="Jumping"end;function onClimbing(P)playAnimation("climb",0.1,h)setAnimationSpeed(P/12.0)i="Climbing"end;function onGettingUp()i="GettingUp"end;function onFreeFall()if J<=0 then playAnimation("fall",M,h)end;i="FreeFall"end;function onFallingDown()i="FallingDown"end;function onSeated()i="Seated"end;function onPlatformStanding()i="PlatformStanding"end;function onSwimming(P)if P>0 then i="Running"else i="Standing"end end;function getTool()for u,a2 in ipairs(a:GetChildren())do if a2.className=="Tool"then return a2 end end;return nil end;function getToolAnim(a3)for u,a4 in ipairs(a3:GetChildren())do if a4.Name=="toolanim"and a4.className=="StringValue"then return a4 end end;return nil end;function animateTool()if H=="None"then playToolAnimation("toolnone",L,h,Enum.AnimationPriority.Idle)return end;if H=="Slash"then playToolAnimation("toolslash",0,h,Enum.AnimationPriority.Action)return end;if H=="Lunge"then playToolAnimation("toollunge",0,h,Enum.AnimationPriority.Action)return end end;function moveSit()c.MaxVelocity=0.15;d.MaxVelocity=0.15;c:SetDesiredAngle(3.14/2)d:SetDesiredAngle(-3.14/2)e:SetDesiredAngle(3.14/2)f:SetDesiredAngle(-3.14/2)end;local a5=0;function move(a6)local a7=1;local a8=1;local a9=a6-a5;a5=a6;local aa=0;local ab=false;if J>0 then J=J-a9 end;if i=="FreeFall"and J<=0 then playAnimation("fall",M,h)elseif i=="Seated"then playAnimation("sit",0.5,h)return elseif i=="Running"then playAnimation("walk",0.1,h)elseif i=="Dead"or i=="GettingUp"or i=="FallingDown"or i=="Seated"or i=="PlatformStanding"then stopAllAnimations()a7=0.1;a8=1;ab=true end;if ab then local ac=a7*math.sin(a6*a8)c:SetDesiredAngle(ac+aa)d:SetDesiredAngle(ac-aa)e:SetDesiredAngle(-ac)f:SetDesiredAngle(-ac)end;local a3=getTool()if a3 and a3:FindFirstChild("Handle")then local ad=getToolAnim(a3)if ad then H=ad.Value;ad.Parent=nil;I=a6+.3 end;if a6>I then I=0;H="None"end;animateTool()else stopToolAnimations()H="None"_=nil;I=0 end end;h.Died:connect(onDied)h.Running:connect(onRunning)h.Jumping:connect(onJumping)h.Climbing:connect(onClimbing)h.GettingUp:connect(onGettingUp)h.FreeFalling:connect(onFreeFall)h.FallingDown:connect(onFallingDown)h.Seated:connect(onSeated)h.PlatformStanding:connect(onPlatformStanding)h.Swimming:connect(onSwimming)game:GetService("Players").LocalPlayer.Chatted:connect(function(ae)local af=""if ae=="/e dance"then af=q[math.random(1,#q)]elseif string.sub(ae,1,3)=="/e "then af=string.sub(ae,4)elseif string.sub(ae,1,7)=="/emote "then af=string.sub(ae,8)end;if i=="Standing"and r[af]~=nil then playAnimation(af,0.1,h)end end)playAnimation("idle",0.1,h)i="Standing"while a.Parent~=nil do local u,a6=wait(0.1)move(a6)end end)
+    end
+end
+
+if getgenv().ReanimationSettings.R15Animations == true then -- R15 Animations
+    if FakeHumanoid.RigType == Enum.HumanoidRigType.R15 then 
+        spawn(function()local a=Dummy;local b=a:WaitForChild("Humanoid")local c="Standing"local d,e=pcall(function()return UserSettings():IsUserFeatureEnabled("UserNoUpdateOnLoop")end)local f=d and e;local g;do local h,i=pcall(function()return UserSettings():IsUserFeatureEnabled("UserEmoteToRunThresholdChange")end)g=h and i end;local j;do local h,i=pcall(function()return UserSettings():IsUserFeatureEnabled("UserPlayEmoteByIdAnimTrackReturn2")end)j=h and i end;local k,l=pcall(function()return UserSettings():IsUserFeatureEnabled("UserAnimateScriptEmoteHook")end)local m=k and l;local n=script:FindFirstChild("ScaleDampeningPercent")local o=2;local p=0.1;local q=""local r=nil;local s=nil;local t=nil;local u=1.0;local v=nil;local w=nil;local x={}local y={}local z={idle={{id="http://www.roblox.com/asset/?id=507766666",weight=1},{id="http://www.roblox.com/asset/?id=507766951",weight=1},{id="http://www.roblox.com/asset/?id=507766388",weight=9}},walk={{id="http://www.roblox.com/asset/?id=507777826",weight=10}},run={{id="http://www.roblox.com/asset/?id=507767714",weight=10}},swim={{id="http://www.roblox.com/asset/?id=507784897",weight=10}},swimidle={{id="http://www.roblox.com/asset/?id=507785072",weight=10}},jump={{id="http://www.roblox.com/asset/?id=507765000",weight=10}},fall={{id="http://www.roblox.com/asset/?id=507767968",weight=10}},climb={{id="http://www.roblox.com/asset/?id=507765644",weight=10}},sit={{id="http://www.roblox.com/asset/?id=2506281703",weight=10}},toolnone={{id="http://www.roblox.com/asset/?id=507768375",weight=10}},toolslash={{id="http://www.roblox.com/asset/?id=522635514",weight=10}},toollunge={{id="http://www.roblox.com/asset/?id=522638767",weight=10}},wave={{id="http://www.roblox.com/asset/?id=507770239",weight=10}},point={{id="http://www.roblox.com/asset/?id=507770453",weight=10}},dance={{id="http://www.roblox.com/asset/?id=507771019",weight=10},{id="http://www.roblox.com/asset/?id=507771955",weight=10},{id="http://www.roblox.com/asset/?id=507772104",weight=10}},dance2={{id="http://www.roblox.com/asset/?id=507776043",weight=10},{id="http://www.roblox.com/asset/?id=507776720",weight=10},{id="http://www.roblox.com/asset/?id=507776879",weight=10}},dance3={{id="http://www.roblox.com/asset/?id=507777268",weight=10},{id="http://www.roblox.com/asset/?id=507777451",weight=10},{id="http://www.roblox.com/asset/?id=507777623",weight=10}},laugh={{id="http://www.roblox.com/asset/?id=507770818",weight=10}},cheer={{id="http://www.roblox.com/asset/?id=507770677",weight=10}}}local A={wave=false,point=false,dance=true,dance2=true,dance3=true,laugh=false,cheer=false}math.randomseed(tick())function findExistingAnimationInSet(B,C)if B==nil or C==nil then return 0 end;for D=1,B.count,1 do if B[D].anim.AnimationId==C.AnimationId then return D end end;return 0 end;function configureAnimationSet(E,F)if y[E]~=nil then for G,H in pairs(y[E].connections)do H:disconnect()end end;y[E]={}y[E].count=0;y[E].totalWeight=0;y[E].connections={}local I=true;local h,J=pcall(function()I=game:GetService("StarterPlayer").AllowCustomAnimations end)if not h then I=true end;local K=script:FindFirstChild(E)if I and K~=nil then table.insert(y[E].connections,K.ChildAdded:connect(function(L)configureAnimationSet(E,F)end))table.insert(y[E].connections,K.ChildRemoved:connect(function(L)configureAnimationSet(E,F)end))local D=0;for G,M in pairs(K:GetChildren())do if M:IsA("Animation")then local N=1;local O=M:FindFirstChild("Weight")if O~=nil then N=O.Value end;y[E].count=y[E].count+1;D=y[E].count;y[E][D]={}y[E][D].anim=M;y[E][D].weight=N;y[E].totalWeight=y[E].totalWeight+y[E][D].weight;table.insert(y[E].connections,M.Changed:connect(function(P)configureAnimationSet(E,F)end))table.insert(y[E].connections,M.ChildAdded:connect(function(P)configureAnimationSet(E,F)end))table.insert(y[E].connections,M.ChildRemoved:connect(function(P)configureAnimationSet(E,F)end))end end end;if y[E].count<=0 then for D,C in pairs(F)do y[E][D]={}y[E][D].anim=Instance.new("Animation")y[E][D].anim.Name=E;y[E][D].anim.AnimationId=C.id;y[E][D].weight=C.weight;y[E].count=y[E].count+1;y[E].totalWeight=y[E].totalWeight+C.weight end end;for Q,R in pairs(y)do for D=1,R.count,1 do if x[R[D].anim.AnimationId]==nil then b:LoadAnimation(R[D].anim)x[R[D].anim.AnimationId]=true end end end end;function configureAnimationSetOld(E,F)if y[E]~=nil then for G,H in pairs(y[E].connections)do H:disconnect()end end;y[E]={}y[E].count=0;y[E].totalWeight=0;y[E].connections={}local I=true;local h,J=pcall(function()I=game:GetService("StarterPlayer").AllowCustomAnimations end)if not h then I=true end;local K=script:FindFirstChild(E)if I and K~=nil then table.insert(y[E].connections,K.ChildAdded:connect(function(L)configureAnimationSet(E,F)end))table.insert(y[E].connections,K.ChildRemoved:connect(function(L)configureAnimationSet(E,F)end))local D=1;for G,M in pairs(K:GetChildren())do if M:IsA("Animation")then table.insert(y[E].connections,M.Changed:connect(function(P)configureAnimationSet(E,F)end))y[E][D]={}y[E][D].anim=M;local O=M:FindFirstChild("Weight")if O==nil then y[E][D].weight=1 else y[E][D].weight=O.Value end;y[E].count=y[E].count+1;y[E].totalWeight=y[E].totalWeight+y[E][D].weight;D=D+1 end end end;if y[E].count<=0 then for D,C in pairs(F)do y[E][D]={}y[E][D].anim=Instance.new("Animation")y[E][D].anim.Name=E;y[E][D].anim.AnimationId=C.id;y[E][D].weight=C.weight;y[E].count=y[E].count+1;y[E].totalWeight=y[E].totalWeight+C.weight end end;for Q,R in pairs(y)do for D=1,R.count,1 do b:LoadAnimation(R[D].anim)end end end;function scriptChildModified(L)local F=z[L.Name]if F~=nil then configureAnimationSet(L.Name,F)end end;script.ChildAdded:connect(scriptChildModified)script.ChildRemoved:connect(scriptChildModified)for E,F in pairs(z)do configureAnimationSet(E,F)end;local S="None"local T=0;local U=0;local V=0.31;local W=0.1;local X=0.2;local Y=false;function stopAllAnimations()local Z=q;if A[Z]~=nil and A[Z]==false then Z="idle"end;if m and Y then Z="idle"Y=false end;q=""r=nil;if t~=nil then t:disconnect()end;if s~=nil then s:Stop()s:Destroy()s=nil end;if w~=nil then w:disconnect()end;if v~=nil then v:Stop()v:Destroy()v=nil end;return Z end;function getHeightScale()if b then if not b.AutomaticScalingEnabled then return 1 end;local _=b.HipHeight/o;if n==nil then n=script:FindFirstChild("ScaleDampeningPercent")end;if n~=nil then _=1+(b.HipHeight-o)*n.Value/o end;return _ end;return 1 end;local function a0(a1)local a2=a1*1.25;local a3=getHeightScale()local a4=a2/a3;return a4 end;local a5=0.0001;local function a6(a1)local a7=0.5;local a8=1;local a4=a0(a1)local a9=a5;local aa=a5;local ab=a4/a7;local ac=a4/a8;if a4<=a7 then a9=1 elseif a4<a8 then local ad=(a4-a7)/(a8-a7)a9=1-ad;aa=ad;ab=1;ac=1 else aa=1 end;s:AdjustWeight(a9)v:AdjustWeight(aa)s:AdjustSpeed(ab)v:AdjustSpeed(ac)end;function setAnimationSpeed(a1)if q=="walk"then a6(a1)else if a1~=u then u=a1;s:AdjustSpeed(u)end end end;function keyFrameReachedFunc(ae)if ae=="End"then if q=="walk"then if f==true then if v.Looped~=true then v.TimePosition=0.0 end;if s.Looped~=true then s.TimePosition=0.0 end else v.TimePosition=0.0;s.TimePosition=0.0 end else local af=q;if A[af]~=nil and A[af]==false then af="idle"end;if m and Y then if s.Looped then return end;af="idle"Y=false end;local ag=u;playAnimation(af,0.15,b)setAnimationSpeed(ag)end end end;function rollAnimation(ah)local ai=math.random(1,y[ah].totalWeight)local aj=ai;local D=1;while ai>y[ah][D].weight do ai=ai-y[ah][D].weight;D=D+1 end;return D end;local function ak(C,ah,al,am)if C~=r then if s~=nil then s:Stop(al)s:Destroy()end;if v~=nil then v:Stop(al)v:Destroy()if f==true then v=nil end end;u=1.0;s=am:LoadAnimation(C)s.Priority=Enum.AnimationPriority.Core;s:Play(al)q=ah;r=C;if t~=nil then t:disconnect()end;t=s.KeyframeReached:connect(keyFrameReachedFunc)if ah=="walk"then local an="run"local ao=rollAnimation(an)v=am:LoadAnimation(y[an][ao].anim)v.Priority=Enum.AnimationPriority.Core;v:Play(al)if w~=nil then w:disconnect()end;w=v.KeyframeReached:connect(keyFrameReachedFunc)end end end;function playAnimation(ah,al,am)local D=rollAnimation(ah)local C=y[ah][D].anim;ak(C,ah,al,am)Y=false end;function playEmote(ap,al,am)ak(ap,ap.Name,al,am)Y=true end;local aq=""local ar=nil;local as=nil;local at=nil;function toolKeyFrameReachedFunc(ae)if ae=="End"then playToolAnimation(aq,0.0,b)end end;function playToolAnimation(ah,al,am,au)local D=rollAnimation(ah)local C=y[ah][D].anim;if as~=C then if ar~=nil then ar:Stop()ar:Destroy()al=0 end;ar=am:LoadAnimation(C)if au then ar.Priority=au end;ar:Play(al)aq=ah;as=C;at=ar.KeyframeReached:connect(toolKeyFrameReachedFunc)end end;function stopToolAnimations()local Z=aq;if at~=nil then at:disconnect()end;aq=""as=nil;if ar~=nil then ar:Stop()ar:Destroy()ar=nil end;return Z end;function onRunning(a1)local av=g and Y and b.MoveDirection==Vector3.new(0,0,0)local aw=av and b.WalkSpeed or 0.75;if a1>aw then local _=16.0;playAnimation("walk",0.2,b)setAnimationSpeed(a1/_)c="Running"else if A[q]==nil and not Y then playAnimation("idle",0.2,b)c="Standing"end end end;function onDied()c="Dead"end;function onJumping()playAnimation("jump",0.1,b)U=V;c="Jumping"end;function onClimbing(a1)local _=5.0;playAnimation("climb",0.1,b)setAnimationSpeed(a1/_)c="Climbing"end;function onGettingUp()c="GettingUp"end;function onFreeFall()if U<=0 then playAnimation("fall",X,b)end;c="FreeFall"end;function onFallingDown()c="FallingDown"end;function onSeated()c="Seated"end;function onPlatformStanding()c="PlatformStanding"end;function onSwimming(a1)if a1>1.00 then local _=10.0;playAnimation("swim",0.4,b)setAnimationSpeed(a1/_)c="Swimming"else playAnimation("swimidle",0.4,b)c="Standing"end end;function animateTool()if S=="None"then playToolAnimation("toolnone",W,b,Enum.AnimationPriority.Idle)return end;if S=="Slash"then playToolAnimation("toolslash",0,b,Enum.AnimationPriority.Action)return end;if S=="Lunge"then playToolAnimation("toollunge",0,b,Enum.AnimationPriority.Action)return end end;function getToolAnim(ax)for G,ay in ipairs(ax:GetChildren())do if ay.Name=="toolanim"and ay.className=="StringValue"then return ay end end;return nil end;local az=0;function stepAnimate(aA)local aB=1;local aC=1;local aD=aA-az;az=aA;local aE=0;local aF=false;if U>0 then U=U-aD end;if c=="FreeFall"and U<=0 then playAnimation("fall",X,b)elseif c=="Seated"then playAnimation("sit",0.5,b)return elseif c=="Running"then playAnimation("walk",0.2,b)elseif c=="Dead"or c=="GettingUp"or c=="FallingDown"or c=="Seated"or c=="PlatformStanding"then stopAllAnimations()aB=0.1;aC=1;aF=true end;local ax=a:FindFirstChildOfClass("Tool")if ax and ax:FindFirstChild("Handle")then local aG=getToolAnim(ax)if aG then S=aG.Value;aG.Parent=nil;T=aA+.3 end;if aA>T then T=0;S="None"end;animateTool()else stopToolAnimations()S="None"as=nil;T=0 end end;b.Died:connect(onDied)b.Running:connect(onRunning)b.Jumping:connect(onJumping)b.Climbing:connect(onClimbing)b.GettingUp:connect(onGettingUp)b.FreeFalling:connect(onFreeFall)b.FallingDown:connect(onFallingDown)b.Seated:connect(onSeated)b.PlatformStanding:connect(onPlatformStanding)b.Swimming:connect(onSwimming)game:GetService("Players").LocalPlayer.Chatted:connect(function(J)local aH=""if string.sub(J,1,3)=="/e "then aH=string.sub(J,4)elseif string.sub(J,1,7)=="/emote "then aH=string.sub(J,8)end;if c=="Standing"and A[aH]~=nil then playAnimation(aH,p,b)end end)if m then script:WaitForChild("PlayEmote").OnInvoke=function(aH)if c~="Standing"then return end;if A[aH]~=nil then playAnimation(aH,p,b)if j then return true,s else return true end elseif typeof(aH)=="Instance"and aH:IsA("Animation")then playEmote(aH,p,b)if j then return true,s else return true end end;return false end end;playAnimation("idle",0.1,b)c="Standing"while a.Parent~=nil do local G,aI=wait(0.1)stepAnimate(aI)end end)
+    end
+end
